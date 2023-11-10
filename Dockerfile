@@ -83,27 +83,7 @@ RUN wget -q -nc --no-check-certificate https://dlcdn.apache.org/hadoop/common/$(
 RUN tar -zxf ${FILENAME} -C ${MYDIR} && rm -rf $FILENAME
 RUN ln -sf hadoop-3* ${HADOOP_HOME}
 
-# Extract Spark to container filesystem
-# Download Spark 3.4.0 from Apache server (if needed)
-ENV FILENAME spark-3.4.0-bin-hadoop3.tgz
-RUN wget -q -nc --no-check-certificate https://dlcdn.apache.org/spark/$(echo "${FILENAME}" | sed -E 's/^spark-([0-9]+\.[0-9]+\.[0-9]+).*/spark-\1/')/${FILENAME}
-RUN tar -zxf ${FILENAME} -C ${MYDIR} && rm -rf ${FILENAME}
-RUN ln -sf ${MYDIR}/spark-3*-bin-hadoop3 ${SPARK_HOME}
 
-# Extract Hive to container filesystem
-# Download Hive 3.1.3 from Apache server (if needed)
-ENV FILENAME apache-hive-3.1.3-bin.tar.gz
-RUN wget -q -nc --no-check-certificate https://dlcdn.apache.org/hive/$(echo "${FILENAME}" | sed -E 's/^apache-hive-([0-9]+\.[0-9]+\.[0-9]+).*/hive-\1/')/${FILENAME}
-RUN tar -zxf ${FILENAME} -C ${MYDIR} && rm -rf ${FILENAME}
-RUN ln -sf ${MYDIR}/apache-hive-* ${HIVE_HOME}
-
-# Additional libs for Spark
-# PostgresSQL JDBC
-RUN wget -q -nc --no-check-certificate https://jdbc.postgresql.org/download/postgresql-42.6.0.jar -P ${SPARK_HOME}/jars
-# Graphframes
-RUN wget -q -nc --no-check-certificate https://repos.spark-packages.org/graphframes/graphframes/0.8.2-spark3.2-s_2.12/graphframes-0.8.2-spark3.2-s_2.12.jar -P ${SPARK_HOME}/jars
-# Install graphframes / pandas (for Spark GraphX/Graphframes and MLlib)
-RUN pip install -q graphframes pandas
 
 # Optional (convert charset from UTF-16 to UTF-8)
 RUN dos2unix config_files/*
@@ -119,14 +99,6 @@ RUN cp config_files/hadoop/mapred-site.xml ${HADOOP_HOME}/etc/hadoop/
 RUN cp config_files/hadoop/yarn-site.xml ${HADOOP_HOME}/etc/hadoop/
 RUN chmod 0755 ${HADOOP_HOME}/etc/hadoop/*.sh
 
-# Copy config files to Spark config folder
-RUN cp config_files/spark/spark-defaults.conf ${SPARK_HOME}/conf
-RUN cp config_files/spark/spark-env.sh ${SPARK_HOME}/conf
-RUN chmod 0755 ${SPARK_HOME}/conf/*.sh
-
-# Copy config files to Hive config folder
-RUN cp config_files/hive/hive-site.xml ${HIVE_HOME}/conf
-RUN ln -sf ${SPARK_HOME}/jars/commons-collections-3.2.2.jar ${HIVE_HOME}/lib/commons-collections-3.2.2.jar
 
 # Configure ssh for passwordless access
 RUN mkdir -p ./.ssh && cat config_files/system/ssh_config >> .ssh/config && chmod 0600 .ssh/config
@@ -140,4 +112,4 @@ RUN sudo rm -rf config_files/ /tmp/* /var/tmp/*
 RUN chmod 0700 bootstrap.sh
 ENTRYPOINT ${MYDIR}/bootstrap.sh
 CMD HADOOP
-# CMD HIVE
+
