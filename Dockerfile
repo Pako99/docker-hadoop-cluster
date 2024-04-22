@@ -20,7 +20,7 @@
 FROM ubuntu:22.04
 
 # Label
-LABEL org.opencontainers.image.author="(C) 2023 CARLOS M D VIEGAS https://github.com/cmdvigas"
+LABEL org.opencontainers.image.authors="(C) 2023 CARLOS M D VIEGAS https://github.com/cmdvigas"
 
 # Error handling
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
